@@ -15,3 +15,11 @@ def azure_db():
 
 def secret_key():
     return config['secret_key']
+
+
+def engine_url():
+    return config['engine']['url']
+
+
+def test_credentials():
+    return config['test']['username'], config['test']['password']

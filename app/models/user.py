@@ -6,10 +6,25 @@ from app.extensions import db
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True)
+    username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(120))
+
+    @staticmethod
+    def add_user(username, password):
+        """
+
+        :param username:
+        :param password:
+        :return:
+        """
+        user = User(username=username)
+        user.hash_password(password)
+
+        db.session.add(user)
+        db.session.commit()
+        return user
 
     def hash_password(self, password):
         """
