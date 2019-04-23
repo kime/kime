@@ -9,6 +9,14 @@ def ok():
     return 200
 
 
+def created():
+    """
+    Response when the request created a new resource
+    :return: 201 Created
+    """
+    return 201
+
+
 def bad_request(message='Bad Request'):
     """
     Response when the server cannot the request due to an apparent client error
