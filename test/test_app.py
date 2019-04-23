@@ -1,20 +1,11 @@
 import pytest
 
-from app import kime
-
-from test import test_image
+from app.__main__ import app as kime
 
 
 @pytest.fixture
 def client():
-    kime.app.config['TESTING'] = True
-    client = kime.app.test_client()
-
-    with kime.app.app_context():
-        kime.init_db()
+    kime.config['TESTING'] = True
+    client = kime.test_client()
 
     return client
-
-
-if __name__ == '__main__':
-    test_image.test_upload(client)
