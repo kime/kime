@@ -17,11 +17,10 @@ def index():
 @blueprint.route('/user')
 @auth.login_required
 def get_user():
-    user_id = session.get('user_id')
-    user = User.query.get(user_id)
+    user = g.user
     if not user:
         return bad_request()
-    return jsonify({'id': user_id,
+    return jsonify({'id': user.id,
                     'username': user.username,
                     'created_at': None,
                     'email': None,
@@ -45,21 +44,19 @@ def get_images():
 def upload_image():
     if 'image' not in request.files or 'name' not in request.args:
         return bad_request()
-    return jsonify(image.upload(request.files['image'].read(), request.args.get('name'), g.user.id))
+    return jsonify(image.upload(request.files['image'].read(), request.args.get('name'), g.user))
 
 
 @blueprint.route('/images/enhance', methods=['POST'])
 @auth.login_required
 def enhance_image():
-    user_id = session.get('user_id')
-    return jsonify(image.enhance())
+    return jsonify(image.enhance(request.json, g.user))
 
 
 @blueprint.route('/images/delete')
 @auth.login_required
 def delete_image():
-    user_id = session.get('user_id')
-    return jsonify(image.delete(user_id))
+    return jsonify(image.delete(g.user))
 
 
 @blueprint.after_app_request

@@ -1,8 +1,11 @@
+import uuid
+
+import requests
+
+from app import config
 from app.models.image import OriginalImage, EnhancedImage
-from app.models.user import User
 from app.services.storage import azure
 from app.util.io import bytes_to_image
-import uuid
 
 
 def list_all(user_id):
@@ -42,9 +45,8 @@ def list_all(user_id):
         })
 
 
-def upload(image_bytes, image_name, user_id):
+def upload(image_bytes, image_name, user):
     image = bytes_to_image(image_bytes)
-    user = User.query.get(user_id)
     blob_name = str(uuid.uuid4()) + '.png'
 
     azure.upload_image(image, 'originalimages', blob_name)
@@ -53,11 +55,12 @@ def upload(image_bytes, image_name, user_id):
 
     return {
         'id': image.id,
-        'name': image.name,
+        'name': image_name,
         'uploaded': None,
         'image': {
             'original': {
-                'url': image.url,
+                'url': blob_url,
+                'blob_name': blob_name,
                 'width': None,
                 'height': None,
             }
@@ -65,10 +68,39 @@ def upload(image_bytes, image_name, user_id):
     }
 
 
-def enhance():
-    return None
+def enhance(request, user):
+    engine_payload = {
+        'id': request['id'],
+        'multiplier': request['multiplier'],
+        'fix_artifacts': request['fix_artifacts'],
+        'image': {
+            'original': request['image']['original']
+        },
+    }
+
+    engine_response = requests.post(config.engine_url(), json=engine_payload).json()
+    blob_url = azure.get_blob_url('enhancedimages', engine_response['image']['enhanced']['blob_name'])
+    original_image = OriginalImage.query.filter_by(id=request['id']).one()
+    EnhancedImage.add_image(blob_url, user, original_image)
+
+    return {
+        'id': request['id'],
+        'name': request['name'],
+        'uploaded': None,
+        'image': {
+            'original': request['image']['original'],
+            'enhanced': {
+                'url': blob_url,
+                'blob_name': engine_response['image']['enhanced']['blob_name'],
+                'width': engine_response['image']['enhanced']['width'],
+                'height': engine_response['image']['enhanced']['height'],
+                'multiplier': request['multiplier'],
+                'fix_artifacts': request['fix_artifacts'],
+            }
+        }
+    }
 
 
-def delete():
+def delete(user):
     # TODO: Implement delete logic
     return None
