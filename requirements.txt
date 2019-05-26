@@ -4,6 +4,6 @@ SQLAlchemy==1.2.16
 itsdangerous==1.1.0
 requests==2.21.0
 Flask==1.0.2
-Flask-SQLAlchemy==2.3.2
+Flask-SQLAlchemy==2.4.0
 passlib==1.7.1
 flask_httpauth==3.2.4
