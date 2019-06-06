@@ -4,7 +4,7 @@ Flask-SQLAlchemy==2.3.2
 flask_httpauth==3.2.4
 gunicorn==19.9.0
 itsdangerous==1.1.0
-pytest==4.0.1
+pytest==4.6.2
 passlib==1.7.1
 requests==2.21.0
 SQLAlchemy==1.2.16
