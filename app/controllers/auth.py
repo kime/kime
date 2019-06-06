@@ -1,9 +1,9 @@
-from flask import Blueprint, session, url_for, g, jsonify
-from flask import redirect, request
+from flask import Blueprint, session, g, jsonify
+from flask import request
 
 from app.extensions import auth
 from app.models.user import User
-from app.responses import bad_request
+from app.responses import bad_request, ok, created
 
 blueprint = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -52,19 +52,24 @@ def signup():
 
     user = User.add_user(username, password)
 
-    return jsonify({'username': user.username}), 201
+    return jsonify({'username': user.username}), created()
 
 
 @blueprint.route('/login', methods=['POST', 'GET'])
 @auth.login_required
 def login():
-    token = g.user.generate_auth_token(600)
+    token = g.user.generate_auth_token(7200)
     return jsonify({'username': g.user.username,
                     'token': token.decode('ascii'),
-                    'duration': 600})
+                    'duration': 7200})
 
 
-@blueprint.route('/logout')
+@blueprint.route('/logout', methods=['POST'])
+@auth.login_required
 def logout():
+    response = {
+        'username': g.user.username,
+        'message': 'You were logged out.'
+    }
     session.clear()
-    return redirect(url_for('home.index'))
+    return jsonify(response), ok()

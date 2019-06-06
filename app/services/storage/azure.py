@@ -32,6 +32,15 @@ def upload_image(image, container, blob_name):
     return blob_service.create_blob_from_bytes(container, blob_name, image_to_bytes(image))
 
 
+def get_blob_name(blob_url):
+    """
+
+    :param blob_url:
+    :return:
+    """
+    return blob_url.split('/')[-1]
+
+
 def get_blob_url(container, blob_name):
     """
 

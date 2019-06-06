@@ -1,29 +1,35 @@
+from base64 import b64encode
+
 from app import config
+from test.test_app import client
 
 
 def login(client, username, password):
-    return client.post('/auth/login', data=dict(
-        username=username,
-        password=password
-    ), follow_redirects=True)
+    auth_headers = {
+        'Authorization': 'Basic %s' % b64encode(bytes('%s:%s' % (username, password), 'utf-8')).decode("ascii")
+    }
+    return client.post('/auth/login', headers=auth_headers)
 
 
-def logout(client):
-    return client.get('/auth/logout', follow_redirects=True)
+def logout(client, username, password):
+    auth_headers = {
+        'Authorization': 'Basic %s' % b64encode(bytes('%s:%s' % (username, password), 'utf-8')).decode("ascii")
+    }
+    return client.post('/auth/logout', headers=auth_headers)
 
 
 def test_auth(client):
     """Make sure login and logout works."""
     test_username, test_password = config.test_credentials()
 
-    rv = login(client, test_username, test_password)
-    assert b'You were logged in' in rv.data
+    response = login(client, test_username, test_password)
+    assert response.status_code == 200
 
-    rv = logout(client)
-    assert b'You were logged out' in rv.data
+    response = logout(client, test_username, test_password)
+    assert response.status_code == 200
 
-    rv = login(client, test_username + 'x', test_password)
-    assert b'Invalid username' in rv.data
+    response = login(client, test_username + 'x', test_password)
+    assert response.status_code == 401
 
-    rv = login(client, test_username, test_password + 'x')
-    assert b'Invalid password' in rv.data
+    response = login(client, test_username, test_password + 'x')
+    assert response.status_code == 401

@@ -42,7 +42,7 @@ class User(db.Model):
         """
         return sha512_crypt.verify(password, self.password_hash)
 
-    def generate_auth_token(self, expiration=600):
+    def generate_auth_token(self, expiration=7200):
         """
 
         :param expiration:
