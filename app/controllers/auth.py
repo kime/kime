@@ -58,10 +58,10 @@ def signup():
 @blueprint.route('/login', methods=['POST', 'GET'])
 @auth.login_required
 def login():
-    token = g.user.generate_auth_token(600)
+    token = g.user.generate_auth_token(7200)
     return jsonify({'username': g.user.username,
                     'token': token.decode('ascii'),
-                    'duration': 600})
+                    'duration': 7200})
 
 
 @blueprint.route('/logout', methods=['POST'])
