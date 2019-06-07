@@ -23,7 +23,3 @@ def engine_url():
 
 def engine_credentials():
     return config['engine']['username'], config['engine']['secret']
-
-
-def test_credentials():
-    return config['test']['username'], config['test']['password']
