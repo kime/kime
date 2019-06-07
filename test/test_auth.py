@@ -1,5 +1,6 @@
 from base64 import b64encode
 
+import test.config
 from app import config
 from test.test_app import client
 
@@ -20,7 +21,7 @@ def logout(client, username, password):
 
 def test_auth(client):
     """Make sure login and logout works."""
-    test_username, test_password = config.test_credentials()
+    test_username, test_password = test.config.test_credentials()
 
     response = login(client, test_username, test_password)
     assert response.status_code == 200
