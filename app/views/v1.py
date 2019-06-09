@@ -41,12 +41,11 @@ async def get_images():
 @login_required
 async def upload_image():
     request_files = await request.files
-    request_args = await request.args
 
-    if 'image' not in request_files or 'name' not in request_args:
+    if 'image' not in request_files or 'name' not in request.args:
         return bad_request()
 
-    return jsonify(image.upload(request_files['image'].read(), request_args.get('name'), current_user))
+    return jsonify(image.upload(request_files['image'].read(), request.args.get('name'), current_user))
 
 
 @blueprint.route('/images/delete')
@@ -63,7 +62,7 @@ async def delete_image():
 @login_required
 async def enhance_image():
     request_context = await request.get_json()
-    return jsonify(image.enhance(request_context, current_user))
+    return jsonify(await image.enhance(request_context, current_user))
 
 
 @blueprint.after_app_request

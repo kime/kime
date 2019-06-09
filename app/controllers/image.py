@@ -1,7 +1,7 @@
 import uuid
 
-import requests
-from requests.auth import HTTPBasicAuth
+import aiohttp
+from aiohttp import BasicAuth
 
 from app import config
 from app.models.image import OriginalImage, EnhancedImage
@@ -74,7 +74,7 @@ def upload(image_bytes, image_name, user):
     }
 
 
-def enhance(request, user):
+async def enhance(request, user):
     """
 
     :param request:
@@ -90,9 +90,11 @@ def enhance(request, user):
         }
     }
 
-    engine_response = requests.post(config.engine_url(),
-                                    json=engine_payload,
-                                    auth=HTTPBasicAuth(*config.engine_credentials())).json()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(config.engine_url(),
+                                auth=BasicAuth(*config.engine_credentials()),
+                                json=engine_payload) as engine_request:
+            engine_response = await engine_request.json()
 
     blob_url = azure.get_blob_url('enhancedimages', engine_response['enhancedImage']['blobName'])
     original_image = OriginalImage.query.filter_by(id=request['id']).one()
