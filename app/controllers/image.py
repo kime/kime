@@ -1,7 +1,7 @@
 import uuid
 
-import requests
-from requests.auth import HTTPBasicAuth
+import aiohttp
+from aiohttp import BasicAuth
 
 from app import config
 from app.models.image import OriginalImage, EnhancedImage
@@ -10,7 +10,7 @@ from app.util.io import bytes_to_image
 from app.extensions import db
 
 
-def list_all(user_id):
+def list_all(user):
     """
 
     :param user_id:
@@ -20,7 +20,7 @@ def list_all(user_id):
                                          OriginalImage.name,
                                          OriginalImage.url.label('original_url'),
                                          EnhancedImage.url.label('enhanced_url')) \
-        .filter(OriginalImage.user_id == user_id) \
+        .filter(OriginalImage.user_id == user.id) \
         .join(EnhancedImage, OriginalImage.id == EnhancedImage.original_id) \
         .all()
 
@@ -74,7 +74,7 @@ def upload(image_bytes, image_name, user):
     }
 
 
-def enhance(request, user):
+async def enhance(request, user):
     """
 
     :param request:
@@ -90,9 +90,11 @@ def enhance(request, user):
         }
     }
 
-    engine_response = requests.post(config.engine_url(),
-                                    json=engine_payload,
-                                    auth=HTTPBasicAuth(*config.engine_credentials())).json()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(config.engine_url(),
+                                auth=BasicAuth(*config.engine_credentials()),
+                                json=engine_payload) as engine_request:
+            engine_response = await engine_request.json()
 
     blob_url = azure.get_blob_url('enhancedimages', engine_response['enhancedImage']['blobName'])
     original_image = OriginalImage.query.filter_by(id=request['id']).one()
@@ -113,6 +115,7 @@ def enhance(request, user):
     }
 
 
-def delete(user):
+def delete(image_id, user):
+    # Check if the user has access to the image
     # TODO: Implement delete logic
     return None

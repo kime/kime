@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, request, session, g
+from flask_login import login_required, current_user
+from quart import Blueprint, jsonify, request
 
-from app.extensions import auth
-from app.models.user import User
 from app.controllers import image
 from app.responses import not_implemented, bad_request
 
@@ -10,18 +9,18 @@ blueprint = Blueprint('api', __name__, url_prefix='/api/%s' % __version__)
 
 
 @blueprint.route('/')
-def index():
+async def index():
     return not_implemented()
 
 
 @blueprint.route('/user')
-@auth.login_required
-def get_user():
-    user = g.user
-    if not user:
+@login_required
+async def get_user():
+    if not current_user:
         return bad_request()
-    return jsonify({'id': user.id,
-                    'username': user.username,
+
+    return jsonify({'id': current_user.id,
+                    'username': current_user.username,
                     'created_at': None,
                     'email': None,
                     'plan_balance': None,
@@ -33,38 +32,45 @@ def get_user():
 
 
 @blueprint.route('/images')
-@auth.login_required
-def get_images():
-    user_id = session.get('user_id')
-    return jsonify(image.list_all(user_id))
+@login_required
+async def get_images():
+    return jsonify(image.list_all(current_user))
 
 
 @blueprint.route('/images/upload', methods=['POST'])
-@auth.login_required
-def upload_image():
-    if 'image' not in request.files or 'name' not in request.args:
+@login_required
+async def upload_image():
+    request_files = await request.files
+
+    if 'image' not in request_files or 'name' not in request.args:
         return bad_request()
-    return jsonify(image.upload(request.files['image'].read(), request.args.get('name'), g.user))
 
-
-@blueprint.route('/images/enhance', methods=['POST'])
-@auth.login_required
-def enhance_image():
-    return jsonify(image.enhance(request.json, g.user))
+    return jsonify(image.upload(request_files['image'].read(), request.args.get('name'), current_user))
 
 
 @blueprint.route('/images/delete')
-@auth.login_required
-def delete_image():
-    return jsonify(image.delete(g.user))
+@login_required
+async def delete_image():
+    request_args = await request.args
+    if 'id' not in request_args:
+        return bad_request()
+
+    return jsonify(request_args.get('id'), image.delete(current_user))
+
+
+@blueprint.route('/images/enhance', methods=['POST'])
+@login_required
+async def enhance_image():
+    request_context = await request.get_json()
+    return jsonify(await image.enhance(request_context, current_user))
 
 
 @blueprint.after_app_request
-def after_request(response):
+async def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     if request.method == 'OPTIONS':
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
-        headers = request.headers.get('Access-Control-Request-Headers')
+        headers = (await request.headers).get('Access-Control-Request-Headers')
         if headers:
             response.headers['Access-Control-Allow-Headers'] = headers
     return response

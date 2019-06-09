@@ -1,5 +1,5 @@
-from flask_httpauth import HTTPBasicAuth
+import flask_login
 from flask_sqlalchemy import SQLAlchemy
 
-auth = HTTPBasicAuth()
+auth = flask_login.LoginManager()
 db = SQLAlchemy()
