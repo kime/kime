@@ -1,14 +1,15 @@
 import os
 
-from flask import Flask
+import quart.flask_patch
+from quart import Quart
 
 from app import controllers, views
-from app.extensions import db
+from app.extensions import db, auth
 from app.services.db import azure
 from app import config
 
 # Create and configure the Flask app
-app = Flask(__name__)
+app = Quart(__name__)
 app.register_blueprint(views.v1.blueprint)
 app.register_blueprint(controllers.auth.blueprint)
 
@@ -16,7 +17,8 @@ app.register_blueprint(controllers.auth.blueprint)
 app.config['SECRET_KEY'] = config.secret_key()
 app.config['SESSION_TYPE'] = 'filesystem'
 
-# Register DB extension
+# Register app extensions
+auth.init_app(app)
 azure.init_app(app, db)
 
 if __name__ == "__main__":

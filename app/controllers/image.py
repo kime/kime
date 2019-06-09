@@ -10,7 +10,7 @@ from app.util.io import bytes_to_image
 from app.extensions import db
 
 
-def list_all(user_id):
+def list_all(user):
     """
 
     :param user_id:
@@ -20,7 +20,7 @@ def list_all(user_id):
                                          OriginalImage.name,
                                          OriginalImage.url.label('original_url'),
                                          EnhancedImage.url.label('enhanced_url')) \
-        .filter(OriginalImage.user_id == user_id) \
+        .filter(OriginalImage.user_id == user.id) \
         .join(EnhancedImage, OriginalImage.id == EnhancedImage.original_id) \
         .all()
 
@@ -113,6 +113,7 @@ def enhance(request, user):
     }
 
 
-def delete(user):
+def delete(image_id, user):
+    # Check if the user has access to the image
     # TODO: Implement delete logic
     return None
