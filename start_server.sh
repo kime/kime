@@ -1,1 +1,1 @@
-gunicorn -w 4 -b 127.0.0.1:3780 app.__main__:app
+hypercorn -w 4 -b 127.0.0.1:3780 --error-log prod_errors.log --access-log prod_requests.log app.__main__:app

@@ -6,3 +6,5 @@ config\.json
 *.pyc
 
 data/images/
+
+*.log
