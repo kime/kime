@@ -33,37 +33,6 @@ def request_loader(request):
 
     return None
 
-# @auth.verify_password
-# def verify_password(auth_token, password):
-#     """
-#
-#     :param auth_token:
-#     :param password:
-#     :return:
-#     """
-#     # Check if auth_token is valid
-#     user = User.verify_auth_token(auth_token)
-#
-#     if not user:
-#         # Authenticate with username and password
-#         user = User.query.filter_by(username=auth_token).first()
-#         if not user or not user.verify_password(password):
-#             return False
-#
-#     # Set Flask global user
-#     session['user_id'] = user.id
-#     g.user = user
-#     return True
-
-
-# @blueprint.before_app_request
-# def get_current_user():
-#     user_id = session.get('user_id')
-#     if user_id is None:
-#         g.user = None
-#     else:
-#         g.user = User.query.filter_by(id=user_id).one()
-
 
 @blueprint.route('/signup', methods=['POST'])
 async def signup():

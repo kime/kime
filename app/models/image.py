@@ -34,7 +34,9 @@ class OriginalImage(db.Model):
         :return:
         """
         image = OriginalImage.query.filter(OriginalImage.id == image_id).one()
-        # TODO: Implement delete logic
+
+        db.session.delete(image)
+        db.session.commit()
         return image
 
     @staticmethod
@@ -72,6 +74,19 @@ class EnhancedImage(db.Model):
         image.original_image = original_image
 
         db.session.add(image)
+        db.session.commit()
+        return image
+
+    @staticmethod
+    def remove_image(image_id):
+        """
+
+        :param image_id:
+        :return:
+        """
+        image = EnhancedImage.query.filter(EnhancedImage.id == image_id).one()
+
+        db.session.delete(image)
         db.session.commit()
         return image
 

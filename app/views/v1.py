@@ -2,15 +2,10 @@ from flask_login import login_required, current_user
 from quart import Blueprint, jsonify, request
 
 from app.controllers import image
-from app.responses import not_implemented, bad_request
+from app.responses import bad_request
 
 __version__ = 'v1'
 blueprint = Blueprint('api', __name__, url_prefix='/api/%s' % __version__)
-
-
-@blueprint.route('/')
-async def index():
-    return not_implemented()
 
 
 @blueprint.route('/user')
@@ -31,10 +26,22 @@ async def get_user():
                     })
 
 
-@blueprint.route('/images')
+@blueprint.route('/images/<id>', methods=['GET'])
+@login_required
+async def get_image(id):
+    return jsonify(image.get(id, current_user))
+
+
+@blueprint.route('/images', methods=['GET'])
 @login_required
 async def get_images():
-    return jsonify(image.list_all(current_user))
+    return jsonify(image.get_all(current_user))
+
+
+@blueprint.route('/images/<id>', methods=['DELETE'])
+@login_required
+async def delete_image(id):
+    return jsonify(image.delete(id, current_user))
 
 
 @blueprint.route('/images/upload', methods=['POST'])
@@ -48,16 +55,6 @@ async def upload_image():
     return jsonify(image.upload(request_files['image'].read(), request.args.get('name'), current_user))
 
 
-@blueprint.route('/images/delete')
-@login_required
-async def delete_image():
-    request_args = await request.args
-    if 'id' not in request_args:
-        return bad_request()
-
-    return jsonify(request_args.get('id'), image.delete(current_user))
-
-
 @blueprint.route('/images/enhance', methods=['POST'])
 @login_required
 async def enhance_image():
@@ -68,9 +65,12 @@ async def enhance_image():
 @blueprint.after_app_request
 async def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
+
     if request.method == 'OPTIONS':
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
         headers = (await request.headers).get('Access-Control-Request-Headers')
+
         if headers:
             response.headers['Access-Control-Allow-Headers'] = headers
+
     return response

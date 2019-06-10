@@ -8,9 +8,52 @@ from app.models.image import OriginalImage, EnhancedImage
 from app.services.storage import azure
 from app.util.io import bytes_to_image
 from app.extensions import db
+from app.responses import forbidden, ok, not_found
 
 
-def list_all(user):
+def get(image_id, user):
+    """
+
+    :param image_id:
+    :param user:
+    :return:
+    """
+    original_image = OriginalImage.query.filter_by(id=image_id).one()
+
+    if not original_image:
+        # Check if the image exists
+        return not_found()
+    elif original_image.user_id != user.id:
+        # Check if the user has access to the image
+        return forbidden()
+
+    enhanced_image = EnhancedImage.query.filter_by(original_id=image_id).one()
+
+    if enhanced_image:
+        enhanced_image_context = {
+            'width': None,
+            'height': None,
+            'multiplier': None,
+            'fixArtifacts': None,
+            'url': enhanced_image.url
+        }
+    else:
+        enhanced_image_context = None
+
+    return {
+        'id': original_image.id,
+        'name': original_image.name,
+        'uploaded': None,
+        'originalImage': {
+            'width': None,
+            'height': None,
+            'url': original_image.url
+        },
+        'enhancedImage': enhanced_image_context
+    }
+
+
+def get_all(user):
     """
 
     :param user_id:
@@ -45,6 +88,32 @@ def list_all(user):
         })
 
     return image_contexts
+
+
+def delete(image_id, user):
+    """
+
+    :param image_id:
+    :param user:
+    :return:
+    """
+    original_image = OriginalImage.query.filter_by(id=image_id).one()
+
+    if not original_image:
+        # Check if the image exists
+        return not_found()
+    elif original_image.user_id != user.id:
+        # Check if the user has access to the image
+        return forbidden()
+
+    # Remove entry in EnhancedImage if it exists
+    enhanced_image = EnhancedImage.query.filter_by(original_id=image_id).one()
+    if enhanced_image:
+        EnhancedImage.remove_image(enhanced_image.id)
+
+    # Remove entry in OriginalImage
+    OriginalImage.remove_image(original_image.id)
+    return ok()
 
 
 def upload(image_bytes, image_name, user):
@@ -113,9 +182,3 @@ async def enhance(request, user):
             'height': engine_response['enhancedImage']['height']
         }
     }
-
-
-def delete(image_id, user):
-    # Check if the user has access to the image
-    # TODO: Implement delete logic
-    return None
