@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Kime is a web app for upscaling and enhancing images using generative adversarial networks. This repository contains the backend service written in Python using Flask. 
+Kime is a web app for upscaling and enhancing images using generative adversarial networks. This repository contains the backend service written in Python using Quart. 
 
 ## Getting Started
 
@@ -51,5 +51,6 @@ Create a new file named `config.json` and update the new file with your Azure cr
 Now you are ready to start the backend service:
 
 ```bash
-$ gunicorn -w 4 -b 127.0.0.1:3780 app.__main__:app
+$ hypercorn -w 4 -b 127.0.0.1:3780 app.__main__:app
+
 ```
