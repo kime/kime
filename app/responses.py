@@ -35,6 +35,15 @@ def forbidden(message='Forbidden'):
     return jsonify({'message': message}), 403
 
 
+def not_found(message='Not Found'):
+    """
+    Response when the requested resource could not be found
+    :param message: explanation of the error situation
+    :return: 404 Not Found
+    """
+    return jsonify({'message': message}), 404
+
+
 def page_expired(message='Page Expired'):
     """
     Response when the user token is missing or has expired
