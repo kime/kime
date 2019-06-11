@@ -49,8 +49,8 @@ async def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     if request.method == 'OPTIONS':
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
-        headers = (await request.headers).get('Access-Control-Request-Headers')
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, PUT, PATCH'
+        headers = request.headers.get('Access-Control-Request-Headers')
 
         if headers:
             response.headers['Access-Control-Allow-Headers'] = headers

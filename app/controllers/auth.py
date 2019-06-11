@@ -91,7 +91,7 @@ async def signup():
     return jsonify({'username': user.username}), created()
 
 
-@blueprint.route('/login', methods=['POST', 'GET'])
+@blueprint.route('/login', methods=['GET', 'POST'])
 @login_required
 async def login():
     token = current_user.generate_auth_token(7200)
@@ -100,7 +100,7 @@ async def login():
                     'duration': 7200})
 
 
-@blueprint.route('/logout', methods=['POST'])
+@blueprint.route('/logout', methods=['GET', 'POST'])
 @login_required
 async def logout():
     logout_user()
