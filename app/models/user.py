@@ -3,6 +3,7 @@ from passlib.hash import sha512_crypt
 
 from app import config
 from app.extensions import db
+from app.responses import bad_request
 
 
 class User(db.Model):
@@ -47,6 +48,19 @@ class User(db.Model):
         :return:
         """
         return sha512_crypt.verify(password, self.password_hash)
+
+    def change_password(self, old_password, new_password):
+        """
+
+        :param oldPassword:
+        :param newPassword:
+        :return:
+        """
+        if not self.verify_password(old_password):
+            return bad_request()
+
+        self.hash_password(new_password)
+        db.session.commit()
 
     def generate_auth_token(self, expiration=7200):
         """

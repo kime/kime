@@ -8,24 +8,6 @@ __version__ = 'v1'
 blueprint = Blueprint('api', __name__, url_prefix='/api/%s' % __version__)
 
 
-@blueprint.route('/user')
-@login_required
-async def get_user():
-    if not current_user:
-        return bad_request()
-
-    return jsonify({'id': current_user.id,
-                    'username': current_user.username,
-                    'created_at': None,
-                    'email': None,
-                    'plan_balance': None,
-                    'file_size_limit': None,
-                    'resolution_limit': None,
-                    'upload_limit': None,
-                    'subscription': None
-                    })
-
-
 @blueprint.route('/images/<id>', methods=['GET'])
 @login_required
 async def get_image(id):
