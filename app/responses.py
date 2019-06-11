@@ -17,6 +17,14 @@ def created():
     return 201
 
 
+def no_content():
+    """
+    Response when request was processed without returning any content
+    :return: 204 No Content
+    """
+    return 204
+
+
 def bad_request(message='Bad Request'):
     """
     Response when the server cannot the request due to an apparent client error
