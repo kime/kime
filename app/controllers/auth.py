@@ -62,8 +62,8 @@ async def get_user():
                     })
 
 
-@blueprint.route('/user', methods=['POST'])
-async def signup():
+@blueprint.route('/user', methods=['PATCH'])
+async def change_password():
     user_context = await request.get_json()
     old_password = user_context.get('oldPassword')
     new_password = user_context.get('newPassword')
@@ -75,13 +75,20 @@ async def signup():
     return no_content()
 
 
-@blueprint.route('/user', methods=['PATCH'])
-@login_required
-async def reset():
-    token = current_user.generate_auth_token(7200)
-    return jsonify({'username': current_user.username,
-                    'token': token.decode('ascii'),
-                    'duration': 7200})
+@blueprint.route('/user', methods=['POST'])
+async def signup():
+    user_context = await request.get_json()
+    username = user_context.get('username')
+    password = user_context.get('password')
+
+    if username is None or password is None:
+        return bad_request()
+
+    if User.query.filter_by(username=username).first() is not None:
+        return bad_request('Username Exists')
+
+    user = User.add_user(username, password)
+    return jsonify({'username': user.username}), created()
 
 
 @blueprint.route('/login', methods=['POST', 'GET'])
