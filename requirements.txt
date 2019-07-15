@@ -5,7 +5,7 @@ azure-storage-blob==2.0.1
 cchardet==2.1.4
 flask-sqlalchemy==2.4.0
 flask-login==0.4.1
-hypercorn==0.6.0
+hypercorn==0.7.0
 itsdangerous==1.1.0
 pytest==4.0.1
 passlib==1.7.1
