@@ -7,7 +7,7 @@ flask-sqlalchemy==2.4.0
 flask-login==0.4.1
 hypercorn==0.7.2
 itsdangerous==1.1.0
-pytest==5.0.1
+pytest==5.2.0
 passlib==1.7.1
 quart==0.9.1
 requests==2.22.0
